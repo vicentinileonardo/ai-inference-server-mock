@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-inference-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-inference-server
+  template:
+    metadata:
+      labels:
+        app: ai-inference-server
+    spec:
+      containers:
+      - name: ai-inference-server
+        image: ai-inference-server:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
