@@ -71,3 +71,9 @@ kubectl delete deploy/ai-inference-server
 kubectl delete service/ai-inference-server
 docker rmi ai-inference-server
 ```
+
+
+## TODO
+
+- folder structure organization
+- multi stage build in Dockerfile
