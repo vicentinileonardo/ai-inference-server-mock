@@ -80,3 +80,4 @@ docker rmi ai-inference-server
 
 - folder structure organization
 - multi stage build in Dockerfile
+- helm chart
