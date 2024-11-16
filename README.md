@@ -2,6 +2,9 @@
 
 ## Description
 
+This repository is part of a project: **Carbon-aware workload scheduling in a multi-cloud environment**.
+This is a simple mock of an AI inference server that provides a scheduling endpoint.
+
 ## Setup
 
 ```bash
