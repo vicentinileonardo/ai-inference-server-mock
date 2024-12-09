@@ -9,10 +9,22 @@ import (
 	"time"
 )
 
+type RegionInfo struct {
+	Name             string `json:"name"`
+	ISOCountryCodeA2 string `json:"iso_country_code_a2"`
+	PhysicalLocation string `json:"physical_location"`
+}
+
+type SchedulingRequest struct {
+	CloudProvider   string       `json:"cloud_provider"`
+	EligibleRegions []RegionInfo `json:"eligible_regions"`
+}
+
 type SchedulingInfo struct {
-	SchedulingTime     string `json:"schedulingTime"`
-	SchedulingProvider string `json:"schedulingProvider"`
-	SchedulingRegion   string `json:"schedulingRegion"`
+	SchedulingTime    string `json:"schedulingTime"`
+	CloudProvider     string `json:"cloudProvider"`
+	SchedulingRegion  string `json:"schedulingRegion"`
+	SchedulingCountry string `json:"schedulingCountry"`
 }
 
 var (
@@ -37,9 +49,9 @@ func getSchedulingInfo(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received request from %s for %s\n", r.RemoteAddr, r.URL.Path)
 
 	info := SchedulingInfo{
-		SchedulingTime:     getRandomFutureTime().Format(time.RFC3339),
-		SchedulingProvider: providers[rand.Intn(len(providers))],
-		SchedulingRegion:   regions[rand.Intn(len(regions))],
+		SchedulingTime:   getRandomFutureTime().Format(time.RFC3339),
+		CloudProvider:    providers[rand.Intn(len(providers))],
+		SchedulingRegion: regions[rand.Intn(len(regions))],
 	}
 
 	w.Header().Set("Content-Type", "application/json")

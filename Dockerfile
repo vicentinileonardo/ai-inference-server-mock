@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY go.mod .
 COPY main.go .
+COPY /data /data
 
 RUN go build -o server
 

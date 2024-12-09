@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-inference-server-mock
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-inference-server-mock
+  template:
+    metadata:
+      labels:
+        app: ai-inference-server-mock
+    spec:
+      containers:
+      - name: ai-inference-server-mock
+        image: leovice/ai-inference-server-mock:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 8080
