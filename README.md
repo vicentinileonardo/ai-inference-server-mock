@@ -5,8 +5,6 @@
 This repository is part of a project: **Carbon-aware workload scheduling in a multi-cloud environment**.
 This is a simple mock of an **AI inference server** that provides a scheduling endpoint to simulate the inference process.
 
-It is possible that a modified version of this will be used as proxy for the real AI inference server in the project, if needed.
-
 ## Setup
 
 ### Kubernetes deployment

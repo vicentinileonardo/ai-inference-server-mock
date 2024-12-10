@@ -16,8 +16,9 @@ type RegionInfo struct {
 }
 
 type SchedulingRequest struct {
-	CloudProvider   string       `json:"cloud_provider"`
-	EligibleRegions []RegionInfo `json:"eligible_regions"`
+	EligibleRegions []string `json:"eligible_regions"`
+	Deadline        string   `json:"deadline"`
+	Duration        string   `json:"duration"`
 }
 
 type SchedulingInfo struct {
@@ -28,32 +29,74 @@ type SchedulingInfo struct {
 }
 
 var (
-	providers = []string{"AWS", "GCP", "Azure"}
-	regions   = []string{"us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"}
+	providers = []string{"azure"}
 )
 
-func getRandomFutureTime() time.Time {
-	now := time.Now()
-
-	// Define the time window
-	minOffset := 30 * time.Minute
-	maxOffset := 48 * time.Hour // 2 days
-
-	// Calculate random duration between minOffset and maxOffset
-	randomDuration := time.Duration(rand.Int63n(int64(maxOffset-minOffset))) + minOffset
-
-	return now.Add(randomDuration)
+func getRandomTimeBetween(start, end time.Time) time.Time {
+	duration := end.Sub(start)
+	randomDuration := time.Duration(rand.Int63n(int64(duration)))
+	return start.Add(randomDuration)
 }
 
 func getSchedulingInfo(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Received request from %s for %s\n", r.RemoteAddr, r.URL.Path)
-
-	info := SchedulingInfo{
-		SchedulingTime:   getRandomFutureTime().Format(time.RFC3339),
-		CloudProvider:    providers[rand.Intn(len(providers))],
-		SchedulingRegion: regions[rand.Intn(len(regions))],
+	// Ensure only POST requests are accepted
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 
+	// Parse the incoming request
+	var request SchedulingRequest
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate input
+	if len(request.EligibleRegions) == 0 {
+		http.Error(w, "No eligible regions provided", http.StatusBadRequest)
+		return
+	}
+
+	// Parse deadline
+	deadline, err := time.Parse(time.RFC3339, request.Deadline)
+	if err != nil {
+		http.Error(w, "Invalid deadline format", http.StatusBadRequest)
+		return
+	}
+
+	// Parse duration
+	duration, err := time.ParseDuration(request.Duration)
+	if err != nil {
+		http.Error(w, "Invalid duration format", http.StatusBadRequest)
+		return
+	}
+
+	// Calculate start time
+	startTime := time.Now().UTC()
+	endTime := deadline.Add(-duration)
+
+	// Validate time range
+	if endTime.Before(startTime) {
+		http.Error(w, "Invalid time range", http.StatusBadRequest)
+		return
+	}
+
+	// Select random scheduling time within the valid range
+	schedulingTime := getRandomTimeBetween(startTime, endTime)
+
+	// Select a random region from eligible regions
+	schedulingRegion := request.EligibleRegions[rand.Intn(len(request.EligibleRegions))]
+
+	// Prepare response with UTC time in ISO 8601 format
+	info := SchedulingInfo{
+		SchedulingTime:   schedulingTime.UTC().Format(time.RFC3339),
+		CloudProvider:    providers[0],
+		SchedulingRegion: schedulingRegion,
+	}
+
+	// Send response
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(info); err != nil {
 		log.Printf("Error encoding response: %v\n", err)
