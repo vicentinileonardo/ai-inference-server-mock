@@ -16,7 +16,7 @@ spec:
       containers:
       - name: ai-inference-server-mock
         image: leovice/ai-inference-server-mock:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
           limits:
             memory: "512Mi"

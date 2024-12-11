@@ -12,7 +12,7 @@ This is a simple mock of an **AI inference server** that provides a scheduling e
 The deployment is done using Helm.
 
 ```bash
-helm install test-ai-mock ./chart --create-namespace --namespace ai-inference-server-mock
+helm install ai-inference-server-mock ./chart --create-namespace --namespace ai-inference-server-mock
 ```
 or:
 ```bash
@@ -46,13 +46,13 @@ kubectl logs -f $(kubectl get pods -l app=ai-inference-server-mock -o name -n ai
 Test the service with a test client and `curl`:
 ```bash
 kubectl run --rm -it --image=alpine/curl:latest test-client -- /bin/sh
-curl http://ai-inference-server-mock.ai-inference-server-mock.svc.cluster.local:8080/scheduling  
-```
-
-Test the service with a test client and `wget`:
-```bash
-kubectl run --rm -it --image=busybox:latest test-client -- /bin/sh
-wget -O- http://ai-inference-server-mock.ai-inference-server-mock.svc.cluster.local:8080/scheduling 
+curl -X POST http://ai-inference-server-mock.ai-inference-server-mock.svc.cluster.local:8080/scheduling \
+     -H "Content-Type: application/json" \
+     -d '{
+         "eligible_regions": ["Italy North", "France Central", "France South"],
+         "deadline": "2027-12-31T23:59:59Z", 
+         "duration": "1h30m"
+     }' 
 ```
 
 Get the pod IP (if needed for debugging purposes):
